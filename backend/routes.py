@@ -51,3 +51,27 @@ def parse_json(data):
 ######################################################################
 # INSERT CODE HERE
 ######################################################################
+
+#health route
+@app.route("/health")
+def health():
+    return jsonify(dict(status="OK")),200
+
+#count route
+@app.route("/count")
+def count():
+    if songs_list:
+        return jsonify(count=len(songs_list)), 200
+    return {"message":"Internal Server Error"}, 500
+
+#get song
+
+@app.route("/song", methods=['GET'])
+def songs():
+    data = db.songs.find()
+    data_list = [song for song in data]
+    
+    if data_list:
+        return jsonify({"songs":f"{data_list}"}), 200
+    return {},500
+
