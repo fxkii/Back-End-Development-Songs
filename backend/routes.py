@@ -65,13 +65,32 @@ def count():
     return {"message":"Internal Server Error"}, 500
 
 #get song
-
 @app.route("/song", methods=['GET'])
 def songs():
     data = db.songs.find()
-    data_list = [song for song in data]
+    #data_list = [song for song in data]
     
-    if data_list:
-        return jsonify({"songs":f"{data_list}"}), 200
+    if data:
+        return parse_json(data), 200
     return {},500
 
+@app.route("/song/<int:id>", methods=["GET"])
+def get_songs_by_id(id):
+    data = db.songs.find_one({"id": id})
+    if data:
+        return parse_json(data),200
+    else:
+        return {"message":f"song with id {id} not found"}, 404
+
+@app.route("/song", methods=["POST"])
+def create_song():
+    rec = request.json
+    data = db.songs.find()
+    data_list = [song for song in data]
+    for check in data_list:
+        if check["id"] == rec["id"]:
+            return {"Message":f"song with id {check['id']} already present"}, 302
+    
+    insert_id: InsertOneResult = db.songs.insert_one(rec)
+    return {"inserted id": parse_json(insert_id.inserted_id)}, 201
+    
